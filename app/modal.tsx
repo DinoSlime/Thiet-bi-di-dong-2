@@ -1,3 +1,5 @@
+// Đây là một modal đơn giản hiển thị một thông điệp và một liên kết để quay về màn hình chính
+
 import { Link } from 'expo-router';
 import { StyleSheet } from 'react-native';
 

@@ -1,3 +1,5 @@
+// Đây là trang chính của ứng dụng, hiển thị nội dung chào mừng và hướng dẫn người dùng
+
 import { Image } from 'expo-image';
 import { Platform, StyleSheet } from 'react-native';
 

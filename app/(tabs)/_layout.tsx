@@ -1,3 +1,5 @@
+// Đây là bố cục tab chính của ứng dụng, định nghĩa các tab và biểu tượng của chúng
+
 import { Tabs } from 'expo-router';
 import React from 'react';
 
