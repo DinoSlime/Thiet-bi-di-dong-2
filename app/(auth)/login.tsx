@@ -46,6 +46,14 @@ const handleLogin = () => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>ĐĂNG NHẬP</Text>
       </TouchableOpacity>
+
+        <TouchableOpacity 
+        onPress={() => router.push('/(auth)/signup')} 
+        style={styles.linkButton}
+      >
+        <Text style={styles.linkText}>Chưa có tài khoản? Đăng ký ngay</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -56,5 +64,8 @@ const styles = StyleSheet.create({
   inputContainer: { width: '80%', gap: 15 },
   input: { backgroundColor: '#333', padding: 15, borderRadius: 10, color: '#fff' },
   button: { backgroundColor: '#1DB954', padding: 15, borderRadius: 10, width: '80%', alignItems: 'center', marginTop: 20 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 }
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+
+  linkButton: { marginTop: 20 },
+  linkText: { color: '#1DB954', fontSize: 14, fontWeight: 'bold' }
 });
