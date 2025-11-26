@@ -25,7 +25,6 @@ export default function SignUpScreen() {
       return;
     }
 
-    // 3. Giả lập đăng ký thành công
     // (Vì không có DB nên ta không lưu, chỉ báo thành công rồi quay về Login)
     Alert.alert('Thành công', 'Tạo tài khoản thành công! Vui lòng đăng nhập.');
     
