@@ -1,4 +1,4 @@
-// Đây là trang đăng nhập của ứng dụng, cho phép người dùng nhập tài khoản và mật khẩu
+// File: app/(auth)/login.tsx
 
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -25,8 +25,6 @@ export default function LoginScreen() {
         "Đăng nhập thất bại",
         "Sai tài khoản hoặc mật khẩu. Vui lòng thử lại!"
       );
-
-      // (Mẹo nhỏ) Nên xóa mật khẩu đi để người dùng nhập lại cho tiện
       setPassword("");
     }
   };
@@ -35,16 +33,18 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>MY MUSIC APP</Text>
       <View style={styles.inputContainer}>
+        <Text style={styles.label}>Tên người dùng</Text>
         <TextInput
           style={styles.input}
-          placeholder="Tài khoản (admin)"
+          placeholder="Nhập tên người dùng (admin)"
           placeholderTextColor="#888"
           value={username}
           onChangeText={setUsername}
         />
+        <Text style={styles.label}>Mật khẩu</Text>
         <TextInput
           style={styles.input}
-          placeholder="Mật khẩu (123)"
+          placeholder="Nhập mật khẩu (123)"
           placeholderTextColor="#888"
           secureTextEntry
           value={password}
@@ -78,7 +78,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 40,
   },
-  inputContainer: { width: "80%", gap: 15 },
+
+  inputContainer: { width: "80%", gap: 10 },
+
+  label: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: -5,
+    marginTop: 5,
+    alignSelf: "flex-start",
+  },
+
   input: {
     backgroundColor: "#333",
     padding: 15,
@@ -91,7 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: "80%",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 30,
   },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 

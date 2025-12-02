@@ -33,10 +33,10 @@ const BAI_HAT = [
   // Copy thêm bài để test cuộn ngang
   {
     id: "3",
-    title: "Bài hát số 3",
-    artist: "Ca sĩ C",
-    image: require("../../assets/images/Camellya.jpg"), // Dùng tạm ảnh cũ
-    uri: require("../../assets/music/HenHoNhungKhongYeu.mp3"),
+    title: "Người yêu bỏ lỡ(愛人錯過)",
+    artist: "Accusefive (告五人)",
+    image: require("../../assets/images/Camellya2.jpg"),
+    uri: require("../../assets/music/NguoiYeuBoLo.mp3"),
   },
 ];
 
@@ -103,7 +103,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.username}>Thành Ninh Bình</Text>
+            <Text style={styles.username}>Thượng Đế</Text>
           </View>
           <TouchableOpacity onPress={() => alert("Chưa có thông báo!")}>
             <Ionicons name="notifications-outline" size={28} color="#fff" />
