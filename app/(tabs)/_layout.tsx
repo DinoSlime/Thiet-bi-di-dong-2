@@ -51,7 +51,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="placeholder" 
         options={{
-          title: 'Mở rộng', // Hoặc đặt tên là "Player", "Khám phá"...
+          title: 'Mở rộng', 
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "disc" : "disc-outline"} size={24} color={color} />
           ),
