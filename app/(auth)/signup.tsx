@@ -1,4 +1,3 @@
-// File: app/(auth)/signup.tsx
 
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -13,29 +12,23 @@ import {
 
 export default function SignUpScreen() {
   const router = useRouter();
-
-  // Tạo 3 biến để lưu dữ liệu nhập
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSignUp = () => {
-    // 1. Kiểm tra rỗng
+
     if (username === "" || password === "" || confirmPassword === "") {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
-    // 2. Kiểm tra mật khẩu có khớp không
     if (password !== confirmPassword) {
       Alert.alert("Lỗi", "Mật khẩu nhập lại không khớp!");
       return;
     }
 
-    // (Vì không có DB nên ta không lưu, chỉ báo thành công rồi quay về Login)
     Alert.alert("Thành công", "Tạo tài khoản thành công! Vui lòng đăng nhập.");
-
-    // Quay lại màn hình Login
     router.back();
   };
 
@@ -81,7 +74,6 @@ export default function SignUpScreen() {
           <Text style={styles.buttonText}>ĐĂNG KÝ NGAY</Text>
         </TouchableOpacity>
 
-        {/* Nút quay lại Login */}
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.linkConfig}

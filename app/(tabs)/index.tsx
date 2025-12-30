@@ -1,4 +1,3 @@
-// File: app/(tabs)/index.tsx
 
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -14,7 +13,6 @@ import {
   View,
 } from "react-native";
 
-// DỮ LIỆU GIẢ (GIỮ NGUYÊN)
 const BAI_HAT = [
   {
     id: "1",
@@ -30,7 +28,7 @@ const BAI_HAT = [
     image: require("../../assets/images/TheShore.png"),
     uri: require("../../assets/music/ThuongMotNguoiMatCaTuongLai.mp3"),
   },
-  // Copy thêm bài để test cuộn ngang
+
   {
     id: "3",
     title: "Người yêu bỏ lỡ(愛人錯過)",
@@ -52,7 +50,6 @@ export default function HomeScreen() {
     return "Chào buổi tối";
   };
 
-  // Logic lọc bài hát
   const filteredSongs = BAI_HAT.filter(
     (song) =>
       song.title.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -71,7 +68,6 @@ export default function HomeScreen() {
     });
   };
 
-  // ITEM DỌC (Cho danh sách dưới)
   const renderVerticalItem = ({ item }: any) => (
     <TouchableOpacity style={styles.songItem} onPress={() => openPlayer(item)}>
       <Image source={item.image} style={styles.songImage} />
@@ -85,7 +81,6 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  // ITEM NGANG (Cho phần Nổi bật)
   const renderHorizontalItem = ({ item }: any) => (
     <TouchableOpacity style={styles.cardItem} onPress={() => openPlayer(item)}>
       <Image source={item.image} style={styles.cardImage} />
@@ -98,7 +93,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header & Search giữ nguyên, nhưng bọc trong View cố định */}
       <View style={styles.fixedHeader}>
         <View style={styles.header}>
           <View>
@@ -126,33 +120,28 @@ export default function HomeScreen() {
           />
         </View>
       </View>
-
-      {/* Dùng ScrollView để cuộn cả trang */}
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 200 }}
       >
-        {/* --- PHẦN 1: NỔI BẬT (LƯỚT NGANG) --- */}
-        {/* Chỉ hiện khi không tìm kiếm */}
         {searchText === "" && (
           <View>
             <Text style={styles.sectionTitle}>🔥 Có thể bạn sẽ thích</Text>
             <FlatList
-              data={BAI_HAT} // Hoặc tạo một danh sách riêng cho mục này
+              data={BAI_HAT}
               renderItem={renderHorizontalItem}
               keyExtractor={(item) => item.id}
-              horizontal={true} // QUAN TRỌNG: Lướt ngang
-              showsHorizontalScrollIndicator={false} // Tắt thanh cuộn
+              horizontal={true} 
+              showsHorizontalScrollIndicator={false}
               style={{ marginBottom: 30 }}
             />
           </View>
         )}
 
-        {/* --- PHẦN 2: DANH SÁCH PHÁT (DỌC) --- */}
+
         <Text style={styles.sectionTitle}>
           {searchText ? "Kết quả tìm kiếm" : "Danh sách phát"}
         </Text>
 
-        {/* Lưu ý: Dùng map thay vì FlatList lồng nhau để tránh lỗi cuộn */}
         {filteredSongs.length > 0 ? (
           filteredSongs.map((item) => (
             <View key={item.id}>{renderVerticalItem({ item })}</View>
@@ -170,7 +159,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#121212" },
 
-  // Header cố định ở trên cùng
   fixedHeader: {
     position: "absolute",
     top: 0,
@@ -209,7 +197,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Style cho Item Dọc (List)
   songItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -224,8 +211,7 @@ const styles = StyleSheet.create({
   songTitle: { color: "white", fontSize: 16, fontWeight: "bold" },
   songArtist: { color: "#b3b3b3", fontSize: 14 },
 
-  // Style cho Item Ngang (Card)
-  cardItem: { marginRight: 15, width: 140, marginLeft: 20 }, // marginLeft 20 cho phần tử đầu tiên thụt vào
+  cardItem: { marginRight: 15, width: 140, marginLeft: 20 },
   cardImage: { width: 140, height: 140, borderRadius: 15, marginBottom: 10 },
   cardTitle: { color: "white", fontSize: 16, fontWeight: "bold" },
   cardArtist: { color: "#b3b3b3", fontSize: 14 },

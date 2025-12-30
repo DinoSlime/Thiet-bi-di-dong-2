@@ -1,5 +1,3 @@
-// File: app/modal.tsx
-
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
@@ -62,13 +60,11 @@ export default function ModalScreen() {
     }
   }
 
-  // --- HÀM MỚI: TUA NHẠC (amount là số giây, ví dụ -10 hoặc +10) ---
   async function seekAudio(amount: number) {
     if (!sound) return;
-    const newPosition = position + amount * 1000; // Đổi sang mili giây
+    const newPosition = position + amount * 1000;
     await sound.setPositionAsync(newPosition);
   }
-  // ----------------------------------------------------------------
 
   async function onSliderValueChange(value: number) {
     if (sound) {
@@ -84,7 +80,6 @@ export default function ModalScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Nút thoát */}
       <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
         <Ionicons name="chevron-down" size={32} color="#fff" />
       </TouchableOpacity>
@@ -115,14 +110,11 @@ export default function ModalScreen() {
         </View>
       </View>
 
-      {/* --- PHẦN NÚT ĐIỀU KHIỂN (Đã sửa lại 3 nút) --- */}
       <View style={styles.controls}>
-        {/* Nút Tua Lại 10s */}
         <TouchableOpacity onPress={() => seekAudio(-10)}>
           <Ionicons name="play-back" size={35} color="#fff" />
         </TouchableOpacity>
 
-        {/* Nút Play/Pause (To hơn ở giữa) */}
         <TouchableOpacity onPress={togglePlay} style={styles.playBtn}>
           <Ionicons
             name={isPlaying ? "pause" : "play"}
@@ -131,7 +123,6 @@ export default function ModalScreen() {
           />
         </TouchableOpacity>
 
-        {/* Nút Tua Đi 10s */}
         <TouchableOpacity onPress={() => seekAudio(10)}>
           <Ionicons name="play-forward" size={35} color="#fff" />
         </TouchableOpacity>
@@ -177,12 +168,11 @@ const styles = StyleSheet.create({
   timeContainer: { flexDirection: "row", justifyContent: "space-between" },
   timeText: { color: "#ccc" },
 
-  // --- STYLE MỚI CHO THANH ĐIỀU KHIỂN ---
   controls: {
-    flexDirection: "row", // Xếp ngang
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-evenly", // Chia đều khoảng cách
-    width: "80%", // Chiếm 80% chiều ngang màn hình
+    justifyContent: "space-evenly",
+    width: "80%",
     marginTop: 20,
   },
   playBtn: {
@@ -192,7 +182,5 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     justifyContent: "center",
     alignItems: "center",
-    // Không cần margin nữa vì đã có justifyContent
   },
-  // playText cũ không dùng nữa vì thay bằng Icon rồi
 });

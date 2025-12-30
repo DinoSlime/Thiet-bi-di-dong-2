@@ -1,5 +1,3 @@
-// File: app/(tabs)/profile.tsx
-
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -16,7 +14,6 @@ import {
 export default function ProfileScreen() {
   const router = useRouter();
 
-  // 1. Hàm xử lý Đăng xuất
   const handleLogout = () => {
     Alert.alert("Đăng xuất", "Bạn có chắc muốn đăng xuất khỏi tài khoản?", [
       { text: "Hủy", style: "cancel" },
@@ -24,14 +21,12 @@ export default function ProfileScreen() {
         text: "Đồng ý",
         style: "destructive",
         onPress: () => {
-          // Sau này sẽ thêm code xóa token ở đây
           router.replace("/(auth)/login");
         },
       },
     ]);
   };
 
-  // 2. Component con để vẽ từng dòng Menu (Giúp code gọn hơn)
   const MenuRow = ({
     icon,
     title,
@@ -64,7 +59,6 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* --- PHẦN 1: HEADER INFO --- */}
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <Image
@@ -78,9 +72,8 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
         <Text style={styles.name}>Thượng Đế</Text>
-        <Text style={styles.email}>admin@gmail.com</Text>
+        <Text style={styles.email}>@admin</Text>
 
-        {/* Thống kê nhỏ */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>3</Text>
@@ -99,7 +92,6 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* --- PHẦN 2: MENU CHỨC NĂNG --- */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Tài khoản</Text>
         <MenuRow icon="person-outline" title="Hồ sơ cá nhân" />
@@ -115,7 +107,6 @@ export default function ProfileScreen() {
         <MenuRow icon="lock-closed-outline" title="Quyền riêng tư" />
       </View>
 
-      {/* --- PHẦN 3: ĐĂNG XUẤT --- */}
       <View style={[styles.section, { marginBottom: 40 }]}>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Đăng xuất</Text>
@@ -126,19 +117,17 @@ export default function ProfileScreen() {
   );
 }
 
-// --- STYLE CHO GIAO DIỆN ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212", // Màu nền đen chủ đạo
+    backgroundColor: "#121212",
   },
 
-  // Header Style
   header: {
     alignItems: "center",
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: "#1E1E1E", // Màu nền header khác một chút cho nổi
+    backgroundColor: "#1E1E1E",
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
@@ -148,7 +137,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: "#1DB954", // Viền xanh thương hiệu
+    borderColor: "#1DB954",
   },
   editBadge: {
     position: "absolute",
@@ -163,7 +152,6 @@ const styles = StyleSheet.create({
   name: { color: "white", fontSize: 22, fontWeight: "bold" },
   email: { color: "#B3B3B3", fontSize: 14, marginTop: 4 },
 
-  // Stats Style
   statsRow: {
     flexDirection: "row",
     marginTop: 20,
@@ -175,7 +163,6 @@ const styles = StyleSheet.create({
   statLabel: { color: "#B3B3B3", fontSize: 12 },
   statDivider: { width: 1, height: "100%", backgroundColor: "#333" },
 
-  // Menu Style
   section: { marginTop: 25, paddingHorizontal: 20 },
   sectionTitle: {
     color: "#666",
@@ -188,7 +175,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1E1E1E", // Nền từng dòng menu
+    backgroundColor: "#1E1E1E",
     padding: 15,
     marginBottom: 10,
     borderRadius: 12,
@@ -207,7 +194,6 @@ const styles = StyleSheet.create({
   menuText: { color: "white", fontSize: 16, fontWeight: "500" },
   textDestructive: { color: "#ff4757" },
 
-  // Logout Style
   logoutButton: {
     marginTop: 10,
     backgroundColor: "transparent",

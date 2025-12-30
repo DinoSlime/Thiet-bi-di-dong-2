@@ -1,4 +1,3 @@
-// File: app/(auth)/login.tsx
 
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -17,7 +16,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    // 1. Kiểm tra tài khoản
+
     if (username === "admin" && password === "123") {
       router.replace("/(tabs)");
     } else {

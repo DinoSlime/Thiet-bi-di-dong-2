@@ -1,4 +1,3 @@
-// Đây là layout gốc của ứng dụng, định nghĩa cấu trúc điều hướng chính
 
 import { Stack } from 'expo-router';
 

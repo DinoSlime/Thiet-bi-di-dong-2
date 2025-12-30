@@ -1,4 +1,3 @@
-// File: app/(tabs)/_layout.tsx
 
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -10,14 +9,14 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#121212', // Màu nền đen
+          backgroundColor: '#121212', 
           borderTopWidth: 0,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#1DB954', // Màu xanh khi chọn
-        tabBarInactiveTintColor: '#888',  // Màu xám khi không chọn
+        tabBarActiveTintColor: '#1DB954',
+        tabBarInactiveTintColor: '#888',  
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: 'bold',
@@ -25,7 +24,6 @@ export default function TabLayout() {
         }
       }}>
       
-      {/* 1. TRANG CHỦ */}
       <Tabs.Screen
         name="index"
         options={{
@@ -36,7 +34,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 2. YÊU THÍCH */}
       <Tabs.Screen
         name="favorites" 
         options={{
@@ -47,7 +44,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 3. TRANG TRỐNG (Để dành) */}
       <Tabs.Screen
         name="placeholder" 
         options={{
@@ -58,7 +54,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 4. CÁ NHÂN */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -68,8 +63,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-
     </Tabs>
   );
 }
