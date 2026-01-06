@@ -12,7 +12,7 @@ import {
 import { useMusic } from "../../context/MusicContext";
 
 export default function FavoritesScreen() {
-  const { songs, isLoading } = useMusic();
+  const { songs, isLoading, playSong, currentSong, isPlaying } = useMusic();
 
   if (isLoading) {
     return (
@@ -25,26 +25,42 @@ export default function FavoritesScreen() {
     );
   }
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => (
-    <TouchableOpacity style={styles.songItem}>
-      <Text style={styles.index}>{index + 1}</Text>
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    const isActive = currentSong?.id === item.id;
 
-      <Image source={{ uri: item.image }} style={styles.songImage} />
-
-      <View style={styles.songInfo}>
-        <Text style={styles.songTitle} numberOfLines={1}>
-          {item.title}
+    return (
+      <TouchableOpacity
+        style={[styles.songItem, isActive && { backgroundColor: "#282828" }]}
+        onPress={() => playSong(item)}
+      >
+        <Text style={[styles.index, isActive && { color: "#1DB954" }]}>
+          {isActive && isPlaying ? (
+            <Ionicons name="musical-notes" size={16} color="#1DB954" />
+          ) : (
+            index + 1
+          )}
         </Text>
-        <Text style={styles.artist} numberOfLines={1}>
-          {item.artist}
-        </Text>
-      </View>
 
-      <TouchableOpacity style={styles.heartButton}>
-        <Ionicons name="heart" size={24} color="#1DB954" />
+        <Image source={{ uri: item.image }} style={styles.songImage} />
+
+        <View style={styles.songInfo}>
+          <Text
+            style={[styles.songTitle, isActive && { color: "#1DB954" }]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text style={styles.artist} numberOfLines={1}>
+            {item.artist}
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.heartButton}>
+          <Ionicons name="heart" size={24} color="#1DB954" />
+        </TouchableOpacity>
       </TouchableOpacity>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
