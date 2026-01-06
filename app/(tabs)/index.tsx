@@ -15,7 +15,8 @@ import { useMusic } from "../../context/MusicContext";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { songs, playSong, currentSong, isPlaying } = useMusic();
+  const { songs, playSong, pauseSong, resumeSong, currentSong, isPlaying } =
+    useMusic();
   const [searchText, setSearchText] = useState("");
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -23,6 +24,18 @@ export default function HomeScreen() {
     if (hour >= 11 && hour < 14) return "Chào buổi trưa";
     if (hour >= 14 && hour < 18) return "Chào buổi chiều";
     return "Chào buổi tối";
+  };
+
+  const handlePlayPress = (song: any) => {
+    if (currentSong?.id === song.id) {
+      if (isPlaying) {
+        pauseSong();
+      } else {
+        resumeSong();
+      }
+    } else {
+      playSong(song);
+    }
   };
 
   const filteredSongs = songs.filter(
@@ -35,28 +48,26 @@ export default function HomeScreen() {
     const isActive = currentSong?.id === item.id;
 
     return (
-      <TouchableOpacity 
-        style={[
-            styles.songItem,
-            isActive && { backgroundColor: '#282828' } 
-        ]} 
-        onPress={() => playSong(item)} 
+      <TouchableOpacity
+        style={[styles.songItem, isActive && { backgroundColor: "#282828" }]}
+        onPress={() => handlePlayPress(item)}
       >
         <Image source={{ uri: item.image }} style={styles.songImage} />
-        
+
         <View style={styles.songInfo}>
-          <Text 
-            style={[styles.songTitle, isActive && { color: '#1DB954' }]} 
+          <Text
+            style={[styles.songTitle, isActive && { color: "#1DB954" }]}
             numberOfLines={1}
           >
             {item.title}
           </Text>
           <Text style={styles.songArtist}>{item.artist}</Text>
         </View>
-        <Ionicons 
-            name={isActive && isPlaying ? "pause-circle" : "play-circle"} 
-            size={30} 
-            color="#1DB954" 
+
+        <Ionicons
+          name={isActive && isPlaying ? "pause-circle" : "play-circle"}
+          size={30}
+          color="#1DB954"
         />
       </TouchableOpacity>
     );
@@ -65,16 +76,19 @@ export default function HomeScreen() {
   const renderHorizontalItem = ({ item }: any) => {
     const isActive = currentSong?.id === item.id;
     return (
-        <TouchableOpacity style={styles.cardItem} onPress={() => playSong(item)}>
+      <TouchableOpacity
+        style={styles.cardItem}
+        onPress={() => handlePlayPress(item)}
+      >
         <Image source={{ uri: item.image }} style={styles.cardImage} />
-        <Text 
-            style={[styles.cardTitle, isActive && { color: '#1DB954' }]} 
-            numberOfLines={1}
+        <Text
+          style={[styles.cardTitle, isActive && { color: "#1DB954" }]}
+          numberOfLines={1}
         >
-            {item.title}
+          {item.title}
         </Text>
         <Text style={styles.cardArtist}>{item.artist}</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
 
@@ -115,7 +129,7 @@ export default function HomeScreen() {
           <View>
             <Text style={styles.sectionTitle}>🔥 Có thể bạn sẽ thích</Text>
             <FlatList
-              data={songs} 
+              data={songs}
               renderItem={renderHorizontalItem}
               keyExtractor={(item) => item.id}
               horizontal={true}
@@ -135,7 +149,9 @@ export default function HomeScreen() {
           ))
         ) : (
           <Text style={{ color: "#888", textAlign: "center", marginTop: 20 }}>
-            {songs.length === 0 ? "Đang tải dữ liệu..." : "Không tìm thấy bài hát"}
+            {songs.length === 0
+              ? "Đang tải dữ liệu..."
+              : "Không tìm thấy bài hát"}
           </Text>
         )}
       </ScrollView>
