@@ -1,4 +1,3 @@
-
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -12,36 +11,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const BAI_HAT = [
-  {
-    id: "1",
-    title: "Hẹn hò nhưng không yêu",
-    artist: "Wendy Thảo",
-    image: require("../../assets/images/Camellya.jpg"),
-    uri: require("../../assets/music/HenHoNhungKhongYeu.mp3"),
-  },
-  {
-    id: "2",
-    title: "Thương một người mất cả tương lai",
-    artist: "Thành Đạt",
-    image: require("../../assets/images/TheShore.png"),
-    uri: require("../../assets/music/ThuongMotNguoiMatCaTuongLai.mp3"),
-  },
-
-  {
-    id: "3",
-    title: "Người yêu bỏ lỡ(愛人錯過)",
-    artist: "Accusefive (告五人)",
-    image: require("../../assets/images/Camellya2.jpg"),
-    uri: require("../../assets/music/NguoiYeuBoLo.mp3"),
-  },
-];
+import { useMusic } from "../../context/MusicContext";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { songs, playSong, currentSong, isPlaying } = useMusic();
   const [searchText, setSearchText] = useState("");
-
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 11) return "Chào buổi sáng";
@@ -50,46 +25,58 @@ export default function HomeScreen() {
     return "Chào buổi tối";
   };
 
-  const filteredSongs = BAI_HAT.filter(
+  const filteredSongs = songs.filter(
     (song) =>
       song.title.toLowerCase().includes(searchText.toLowerCase()) ||
       song.artist.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const openPlayer = (baiHat: any) => {
-    router.push({
-      pathname: "/modal",
-      params: {
-        title: baiHat.title,
-        artist: baiHat.artist,
-        image: baiHat.image,
-        uri: baiHat.uri,
-      },
-    });
+  const renderVerticalItem = ({ item }: any) => {
+    const isActive = currentSong?.id === item.id;
+
+    return (
+      <TouchableOpacity 
+        style={[
+            styles.songItem,
+            isActive && { backgroundColor: '#282828' } 
+        ]} 
+        onPress={() => playSong(item)} 
+      >
+        <Image source={{ uri: item.image }} style={styles.songImage} />
+        
+        <View style={styles.songInfo}>
+          <Text 
+            style={[styles.songTitle, isActive && { color: '#1DB954' }]} 
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          <Text style={styles.songArtist}>{item.artist}</Text>
+        </View>
+        <Ionicons 
+            name={isActive && isPlaying ? "pause-circle" : "play-circle"} 
+            size={30} 
+            color="#1DB954" 
+        />
+      </TouchableOpacity>
+    );
   };
 
-  const renderVerticalItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.songItem} onPress={() => openPlayer(item)}>
-      <Image source={item.image} style={styles.songImage} />
-      <View style={styles.songInfo}>
-        <Text style={styles.songTitle} numberOfLines={1}>
-          {item.title}
+  const renderHorizontalItem = ({ item }: any) => {
+    const isActive = currentSong?.id === item.id;
+    return (
+        <TouchableOpacity style={styles.cardItem} onPress={() => playSong(item)}>
+        <Image source={{ uri: item.image }} style={styles.cardImage} />
+        <Text 
+            style={[styles.cardTitle, isActive && { color: '#1DB954' }]} 
+            numberOfLines={1}
+        >
+            {item.title}
         </Text>
-        <Text style={styles.songArtist}>{item.artist}</Text>
-      </View>
-      <Ionicons name="play-circle" size={30} color="#1DB954" />
-    </TouchableOpacity>
-  );
-
-  const renderHorizontalItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.cardItem} onPress={() => openPlayer(item)}>
-      <Image source={item.image} style={styles.cardImage} />
-      <Text style={styles.cardTitle} numberOfLines={1}>
-        {item.title}
-      </Text>
-      <Text style={styles.cardArtist}>{item.artist}</Text>
-    </TouchableOpacity>
-  );
+        <Text style={styles.cardArtist}>{item.artist}</Text>
+        </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -120,6 +107,7 @@ export default function HomeScreen() {
           />
         </View>
       </View>
+
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 200 }}
       >
@@ -127,16 +115,15 @@ export default function HomeScreen() {
           <View>
             <Text style={styles.sectionTitle}>🔥 Có thể bạn sẽ thích</Text>
             <FlatList
-              data={BAI_HAT}
+              data={songs} 
               renderItem={renderHorizontalItem}
               keyExtractor={(item) => item.id}
-              horizontal={true} 
+              horizontal={true}
               showsHorizontalScrollIndicator={false}
               style={{ marginBottom: 30 }}
             />
           </View>
         )}
-
 
         <Text style={styles.sectionTitle}>
           {searchText ? "Kết quả tìm kiếm" : "Danh sách phát"}
@@ -147,8 +134,8 @@ export default function HomeScreen() {
             <View key={item.id}>{renderVerticalItem({ item })}</View>
           ))
         ) : (
-          <Text style={{ color: "#888", textAlign: "center" }}>
-            Không tìm thấy bài hát
+          <Text style={{ color: "#888", textAlign: "center", marginTop: 20 }}>
+            {songs.length === 0 ? "Đang tải dữ liệu..." : "Không tìm thấy bài hát"}
           </Text>
         )}
       </ScrollView>
