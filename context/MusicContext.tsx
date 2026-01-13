@@ -34,7 +34,7 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchSongs = async () => {
       try {
         const response = await fetch(
-          "https://gist.githubusercontent.com/DinoSlime/1193b2e6ca0211a348172233bcd5c4ec/raw/797640f530c0c269adcb8fce99699ec186dbdb1e/song.json"
+          "https://gist.githubusercontent.com/DinoSlime/1193b2e6ca0211a348172233bcd5c4ec/raw/485bef861e726693dd402b26e99ad5f5c1a92f0a/song.json"
         );
         const data = await response.json();
         setSongs(data);
