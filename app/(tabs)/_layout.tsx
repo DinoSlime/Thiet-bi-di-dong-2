@@ -1,14 +1,11 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { View } from 'react-native'; // 👈 1. Thêm import View
+import { View } from 'react-native'; 
 import { Ionicons } from '@expo/vector-icons';
-
-// 👇 2. Import MiniPlayer
 import MiniPlayer from '../../components/MiniPlayer';
 
 export default function TabLayout() {
   return (
-    // 👇 3. Bọc Tabs trong View để nhét thêm MiniPlayer vào cùng
     <View style={{ flex: 1, position: 'relative' }}>
       
       <Tabs
@@ -70,8 +67,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-
-      {/* 👇 4. MiniPlayer nằm ở đây (nó sẽ nổi lên trên nhờ position: absolute trong file CSS của nó) */}
       <MiniPlayer />
 
     </View>

@@ -1,105 +1,92 @@
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { Audio } from "expo-av";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import { useMusic } from "../context/MusicContext";
+
+const formatTime = (millis: number) => {
+  if (!millis) return "0:00";
+  const minutes = Math.floor(millis / 60000);
+  const seconds = Math.floor((millis % 60000) / 1000);
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
 
 export default function ModalScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const {
+    currentSong,
+    isPlaying,
+    pauseSong,
+    resumeSong,
+    position,
+    duration,
+    seekSong,
+    playNext,
+    playPrevious,
+    toggleShuffle,
+    toggleRepeat,
+    isShuffle,
+    repeatMode,
+  } = useMusic();
 
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [position, setPosition] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
 
-  useEffect(() => {
-    let soundObject: Audio.Sound | null = null;
-
-    async function startMusic() {
-      try {
-        const { sound } = await Audio.Sound.createAsync(Number(params.uri), {
-          shouldPlay: true,
-        });
-
-        soundObject = sound;
-        setSound(sound);
-        setIsPlaying(true);
-
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded) {
-            setDuration(status.durationMillis || 0);
-            setPosition(status.positionMillis || 0);
-            setIsPlaying(status.isPlaying);
-            if (status.didJustFinish) {
-              setIsPlaying(false);
-            }
-          }
-        });
-      } catch (error) {
-        console.log("Lỗi tải nhạc:", error);
-      }
-    }
-
-    startMusic();
-
-    return () => {
-      if (soundObject) {
-        soundObject.unloadAsync();
-      }
-    };
-  }, []);
-
-  async function togglePlay() {
-    if (!sound) return;
-    if (isPlaying) {
-      await sound.pauseAsync();
-    } else {
-      await sound.playAsync();
-    }
+  if (!currentSong) {
+    router.back();
+    return null;
   }
-
-  async function seekAudio(amount: number) {
-    if (!sound) return;
-    const newPosition = position + amount * 1000;
-    await sound.setPositionAsync(newPosition);
-  }
-
-  async function onSliderValueChange(value: number) {
-    if (sound) {
-      await sound.setPositionAsync(value);
-    }
-  }
-
-  const formatTime = (millis: number) => {
-    const minutes = Math.floor(millis / 60000);
-    const seconds = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (Number(seconds) < 10 ? "0" : "") + seconds;
-  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-        <Ionicons name="chevron-down" size={32} color="#fff" />
-      </TouchableOpacity>
+      <StatusBar style="light" />
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
+            if (router.canGoBack()) router.back();
+          }}
+          style={styles.closeButton}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <Ionicons name="chevron-down" size={32} color="white" />
+        </TouchableOpacity>
 
-      <View style={styles.artworkWrapper}>
-        <Image source={Number(params.image)} style={styles.artwork} />
+        <Text style={styles.headerTitle}>Đang phát nhạc</Text>
+
+        <TouchableOpacity style={styles.closeButton}>
+          <Ionicons name="ellipsis-horizontal" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.info}>
-        <Text style={styles.title}>{params.title}</Text>
-        <Text style={styles.artist}>{params.artist}</Text>
+      <View style={styles.artworkContainer}>
+        <Image source={{ uri: currentSong.image }} style={styles.artwork} />
       </View>
 
-      <View style={styles.progressContainer}>
+      <View style={styles.infoContainer}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title} numberOfLines={1}>
+            {currentSong.title}
+          </Text>
+          <Text style={styles.artist}>{currentSong.artist}</Text>
+        </View>
+        <TouchableOpacity onPress={() => setIsLiked(!isLiked)}>
+          <Ionicons
+            name={isLiked ? "heart" : "heart-outline"}
+            size={28}
+            color={isLiked ? "#1DB954" : "white"}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.sliderContainer}>
         <Slider
           style={{ width: "100%", height: 40 }}
           minimumValue={0}
           maximumValue={duration}
           value={position}
-          onSlidingComplete={onSliderValueChange}
+          onSlidingComplete={seekSong}
           minimumTrackTintColor="#1DB954"
           maximumTrackTintColor="#555"
           thumbTintColor="#1DB954"
@@ -111,20 +98,45 @@ export default function ModalScreen() {
       </View>
 
       <View style={styles.controls}>
-        <TouchableOpacity onPress={() => seekAudio(-10)}>
-          <Ionicons name="play-back" size={35} color="#fff" />
+        <TouchableOpacity onPress={toggleShuffle}>
+          <Ionicons
+            name="shuffle"
+            size={24}
+            color={isShuffle ? "#1DB954" : "#777"}
+          />
+          {isShuffle && <View style={styles.dot} />}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={playPrevious}>
+          <Ionicons name="play-skip-back" size={35} color="white" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={togglePlay} style={styles.playBtn}>
+        <TouchableOpacity
+          style={styles.playButtonWrapper}
+          onPress={() => (isPlaying ? pauseSong() : resumeSong())}
+        >
           <Ionicons
             name={isPlaying ? "pause" : "play"}
-            size={40}
-            color="#fff"
+            size={36}
+            color="black"
+            style={{ marginLeft: isPlaying ? 0 : 4 }}
           />
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => seekAudio(10)}>
-          <Ionicons name="play-forward" size={35} color="#fff" />
+        <TouchableOpacity onPress={playNext}>
+          <Ionicons name="play-skip-forward" size={35} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleRepeat}>
+          <Ionicons
+            name={repeatMode === 1 ? "repeat" : "repeat"}
+            size={24}
+            color={repeatMode === 1 ? "#1DB954" : "#777"}
+          />
+          {repeatMode === 1 && (
+            <View style={[styles.dot, { right: 8 }]}>
+              <Text style={{ color: "white", fontSize: 8, fontWeight: "bold" }}>
+                1
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -134,52 +146,75 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    paddingHorizontal: 25,
+    justifyContent: "space-between",
+    paddingVertical: 30,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
+    marginTop: 10,
+  },
+  closeButton: { padding: 5 },
+  headerTitle: {
+    color: "#ccc",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  artworkContainer: {
+    alignItems: "center",
     justifyContent: "center",
-  },
-  closeBtn: {
-    position: "absolute",
-    top: 40,
-    left: 20,
-    zIndex: 10,
-    padding: 10,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 20,
-  },
-  artworkWrapper: {
-    marginTop: 20,
+    marginTop: 10,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 20,
   },
-  artwork: { width: 300, height: 300, borderRadius: 10 },
-  info: { marginTop: 30, alignItems: "center" },
-  title: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  artist: { color: "#ccc", fontSize: 18, marginTop: 5 },
-  progressContainer: { width: "100%", marginTop: 40 },
-  timeContainer: { flexDirection: "row", justifyContent: "space-between" },
-  timeText: { color: "#ccc" },
-
-  controls: {
+  artwork: { width: 320, height: 320, borderRadius: 12 },
+  infoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-evenly",
-    width: "80%",
-    marginTop: 20,
+    justifyContent: "space-between",
+    marginTop: 30,
+    marginBottom: 10,
   },
-  playBtn: {
-    backgroundColor: "#1DB954",
+  title: { color: "white", fontSize: 22, fontWeight: "bold", marginBottom: 2 },
+  artist: { color: "#B3B3B3", fontSize: 16 },
+  sliderContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: -5,
+  },
+  timeText: { color: "#b3b3b3", fontSize: 12 },
+  controls: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  playButtonWrapper: {
     width: 70,
     height: 70,
     borderRadius: 35,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dot: {
+    position: "absolute",
+    bottom: -5,
+    alignSelf: "center",
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#1DB954",
     justifyContent: "center",
     alignItems: "center",
   },
