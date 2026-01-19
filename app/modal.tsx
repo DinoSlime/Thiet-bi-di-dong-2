@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React from "react"; 
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useMusic } from "../context/MusicContext";
@@ -16,32 +16,24 @@ const formatTime = (millis: number) => {
 
 export default function ModalScreen() {
   const router = useRouter();
-  const {
-    currentSong,
-    isPlaying,
-    pauseSong,
-    resumeSong,
-    position,
-    duration,
-    seekSong,
-    playNext,
-    playPrevious,
-    toggleShuffle,
-    toggleRepeat,
-    isShuffle,
-    repeatMode,
+  const { 
+      currentSong, isPlaying, pauseSong, resumeSong, 
+      position, duration, seekSong, 
+      playNext, playPrevious, toggleShuffle, toggleRepeat, 
+      isShuffle, repeatMode,
+      toggleFavorite, checkIsFavorite 
   } = useMusic();
-
-  const [isLiked, setIsLiked] = useState(false);
 
   if (!currentSong) {
     router.back();
     return null;
   }
-
+  const isLiked = checkIsFavorite(currentSong.id);
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
+
+
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => {
@@ -71,7 +63,8 @@ export default function ModalScreen() {
           </Text>
           <Text style={styles.artist}>{currentSong.artist}</Text>
         </View>
-        <TouchableOpacity onPress={() => setIsLiked(!isLiked)}>
+
+        <TouchableOpacity onPress={() => toggleFavorite(currentSong)}>
           <Ionicons
             name={isLiked ? "heart" : "heart-outline"}
             size={28}

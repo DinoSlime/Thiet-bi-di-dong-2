@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
@@ -12,38 +12,23 @@ import {
 import { useMusic } from "../../context/MusicContext";
 
 export default function FavoritesScreen() {
-  const { songs, isLoading, playSong, currentSong, isPlaying } = useMusic();
+  const { favoriteSongs, playSong, currentSong, toggleFavorite } = useMusic();
+  const router = useRouter();
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color="#1DB954" />
-        <Text style={{ color: "white", marginTop: 10 }}>
-          Đang tải dữ liệu...
-        </Text>
-      </View>
-    );
-  }
-
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({ item }: { item: any }) => {
     const isActive = currentSong?.id === item.id;
 
     return (
       <TouchableOpacity
-        style={[styles.songItem, isActive && { backgroundColor: "#282828" }]}
-        onPress={() => playSong(item)}
+        style={[styles.itemContainer, isActive && styles.activeItem]}
+        onPress={() => {
+          playSong(item);
+          router.push("/modal");
+        }}
       >
-        <Text style={[styles.index, isActive && { color: "#1DB954" }]}>
-          {isActive && isPlaying ? (
-            <Ionicons name="musical-notes" size={16} color="#1DB954" />
-          ) : (
-            index + 1
-          )}
-        </Text>
+        <Image source={{ uri: item.image }} style={styles.image} />
 
-        <Image source={{ uri: item.image }} style={styles.songImage} />
-
-        <View style={styles.songInfo}>
+        <View style={styles.textContainer}>
           <Text
             style={[styles.songTitle, isActive && { color: "#1DB954" }]}
             numberOfLines={1}
@@ -55,7 +40,22 @@ export default function FavoritesScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.heartButton}>
+        {isActive && (
+            <Ionicons 
+                name="stats-chart" 
+                size={18} 
+                color="#1DB954" 
+                style={{ marginRight: 5 }} 
+            />
+        )}
+
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            toggleFavorite(item);
+          }}
+        >
           <Ionicons name="heart" size={24} color="#1DB954" />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -65,45 +65,67 @@ export default function FavoritesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Bài hát yêu thích</Text>
+        <Text style={styles.headerTitle}>Yêu thích</Text>
+        <Text style={styles.subTitle}>{favoriteSongs.length} bài hát</Text>
       </View>
 
-      <Text style={styles.subTitle}>
-        {songs.length} bài hát • Đã tải từ Server
-      </Text>
-
-      <FlatList
-        data={songs}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-      />
+      {favoriteSongs.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Ionicons name="heart-dislike-outline" size={80} color="#333" />
+          <Text style={styles.emptyText}>Chưa có bài hát nào</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={favoriteSongs}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212" },
-  center: { justifyContent: "center", alignItems: "center" },
-  header: { paddingTop: 60, paddingHorizontal: 20, marginBottom: 20 },
-  headerTitle: { fontSize: 28, fontWeight: "bold", color: "white" },
-  subTitle: {
-    color: "#B3B3B3",
-    fontSize: 14,
-    paddingHorizontal: 20,
-    marginBottom: 20,
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+    paddingTop: 50,
+    paddingHorizontal: 15,
   },
-  listContent: { paddingBottom: 100 },
-  songItem: {
+  header: { marginBottom: 20 },
+  headerTitle: { fontSize: 32, color: "white", fontWeight: "bold" },
+  subTitle: { color: "#B3B3B3", fontSize: 14, marginTop: 5 },
+
+  itemContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    marginBottom: 15,
+    padding: 10,
+    borderRadius: 8,
   },
-  index: { color: "#B3B3B3", fontSize: 16, width: 25, textAlign: "center" },
-  songImage: { width: 50, height: 50, borderRadius: 4, marginHorizontal: 15 },
-  songInfo: { flex: 1, justifyContent: "center" },
-  songTitle: { color: "white", fontSize: 16, fontWeight: "600" },
+  activeItem: { backgroundColor: "#282828" },
+  image: { width: 50, height: 50, borderRadius: 4 },
+
+  textContainer: { flex: 1, marginLeft: 15, paddingRight: 10 },
+  songTitle: { color: "white", fontSize: 16, fontWeight: "500" },
   artist: { color: "#B3B3B3", fontSize: 14 },
-  heartButton: { marginRight: 15 },
+
+  removeButton: {
+    padding: 10,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: -50,
+  },
+  emptyText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 20,
+  },
+  emptySubText: { color: "#777", marginTop: 10 },
 });

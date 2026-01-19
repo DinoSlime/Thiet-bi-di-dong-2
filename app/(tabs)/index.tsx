@@ -15,9 +15,13 @@ import { useMusic } from "../../context/MusicContext";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { songs, playSong, pauseSong, resumeSong, currentSong, isPlaying } =
-    useMusic();
+  const { 
+    songs, playSong, pauseSong, resumeSong, currentSong, isPlaying,
+    toggleFavorite, checkIsFavorite 
+  } = useMusic();
+  
   const [searchText, setSearchText] = useState("");
+  
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 11) return "Chào buổi sáng";
@@ -46,7 +50,7 @@ export default function HomeScreen() {
 
   const renderVerticalItem = ({ item }: any) => {
     const isActive = currentSong?.id === item.id;
-
+    const isLiked = checkIsFavorite(item.id);
     return (
       <TouchableOpacity
         style={[styles.songItem, isActive && { backgroundColor: "#282828" }]}
@@ -63,6 +67,20 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.songArtist}>{item.artist}</Text>
         </View>
+
+        <TouchableOpacity 
+            style={{ marginRight: 15, padding: 5 }}
+            onPress={(e) => {
+                e.stopPropagation(); 
+                toggleFavorite(item);
+            }}
+        >
+            <Ionicons 
+                name={isLiked ? "heart" : "heart-outline"} 
+                size={24} 
+                color={isLiked ? "#1DB954" : "#B3B3B3"} 
+            />
+        </TouchableOpacity>
 
         <Ionicons
           name={isActive && isPlaying ? "pause-circle" : "play-circle"}
