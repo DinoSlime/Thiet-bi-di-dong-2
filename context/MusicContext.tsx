@@ -1,4 +1,4 @@
-import { Audio } from "expo-av";
+import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -50,7 +50,7 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
   const loadingRequestId = useRef(0);
 
   useEffect(() => {
-    // Tải nhạc từ API
+    configureAudio();
     fetch("https://gist.githubusercontent.com/DinoSlime/1193b2e6ca0211a348172233bcd5c4ec/raw/485bef861e726693dd402b26e99ad5f5c1a92f0a/song.json")
       .then((response) => response.json())
       .then((data) => {
@@ -61,6 +61,23 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
 
     loadFavorites();
   }, []);
+
+  const configureAudio = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: true, 
+        playsInSilentModeIOS: true,    
+        shouldDuckAndroid: true,       
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix, 
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        playThroughEarpieceAndroid: false
+      });
+      console.log("Cấu hình Audio Background thành công!");
+    } catch (e) {
+      console.error("Lỗi cấu hình Audio:", e);
+    }
+  };
 
   const loadFavorites = async () => {
     try {
@@ -135,7 +152,10 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
         newSound.setOnPlaybackStatusUpdate(async (status) => {
             if (myRequestId !== loadingRequestId.current) return;
             if (!status.isLoaded) return;
-            setPosition(status.positionMillis || 0); setDuration(status.durationMillis || 0); setIsPlaying(status.isPlaying);
+            setPosition(status.positionMillis || 0); 
+            setDuration(status.durationMillis || 0); 
+            setIsPlaying(status.isPlaying); 
+
             if (status.didJustFinish) {
                 if (repeatModeRef.current === 1) { try { await newSound.replayAsync(); } catch(e) {} } 
                 else { const nextSong = getNextSong(); if (nextSong) playSong(nextSong); }
