@@ -21,8 +21,13 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "usesCleartextTraffic": true, 
-      "package": "com.student.appnghenhac"
+      "usesCleartextTraffic": true,
+      "package": "com.dinoslime.musicplayer",
+      "permissions": [
+        "INTERNET",
+        "WAKE_LOCK",
+        "FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "output": "static",
@@ -46,6 +51,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "abdfcf3c-bc28-4a7b-9fb1-51411047a0e5"
+      }
     }
   }
 }

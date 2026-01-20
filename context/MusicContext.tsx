@@ -10,8 +10,18 @@ type Song = {
   url: string;
 };
 
+// 👇 1. Định nghĩa kiểu dữ liệu cho Album (Game/Genre)
+type Album = {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  songIds: string[]; // Danh sách ID các bài hát trong album
+};
+
 type MusicContextType = {
   songs: Song[];
+  albums: Album[]; // 👇 2. Thêm Albums vào Context
   favoriteSongs: Song[]; 
   currentSong: Song | null;
   isPlaying: boolean;
@@ -35,6 +45,7 @@ const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
 export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
   const [songs, setSongs] = useState<Song[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]); // 👇 State lưu danh sách Album
   const [favoriteSongs, setFavoriteSongs] = useState<Song[]>([]); 
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -51,6 +62,8 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     configureAudio();
+
+    // Tải Nhạc
     fetch("https://gist.githubusercontent.com/DinoSlime/1193b2e6ca0211a348172233bcd5c4ec/raw/485bef861e726693dd402b26e99ad5f5c1a92f0a/song.json")
       .then((response) => response.json())
       .then((data) => {
@@ -58,6 +71,12 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
         songsRef.current = data;
       })
       .catch((error) => console.error("Lỗi tải nhạc:", error));
+
+    // 👇 3. Tải Album từ API (Link mẫu giả lập Wuthering Waves & Chill)
+    fetch("https://gist.githubusercontent.com/DinoSlime/2ab0cf9c58429c0900a48dd125fa6e4e/raw/b886a14cf809addd83e509ca096cf588c8ab336c/albums.json")
+      .then((response) => response.json())
+      .then((data) => setAlbums(data))
+      .catch((error) => console.error("Lỗi tải album:", error));
 
     loadFavorites();
   }, []);
@@ -170,7 +189,9 @@ export const MusicProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <MusicContext.Provider
       value={{
-        songs, favoriteSongs, currentSong, isPlaying, playSong, pauseSong, resumeSong, seekSong,
+        songs, 
+        albums, // 👇 4. Xuất Albums ra để Library dùng
+        favoriteSongs, currentSong, isPlaying, playSong, pauseSong, resumeSong, seekSong,
         playNext, playPrevious, toggleShuffle, toggleRepeat, toggleFavorite, checkIsFavorite, 
         isShuffle, repeatMode, position, duration,
       }}

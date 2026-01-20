@@ -48,14 +48,18 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="placeholder" 
-          options={{
-            title: 'Mở rộng', 
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? "disc" : "disc-outline"} size={24} color={color} />
-            ),
-          }}
-        />
+                name="library" 
+                options={{
+                  title: "Thư viện",
+                  tabBarIcon: ({ color, focused }) => (
+                    <Ionicons
+                      name={focused ? "library" : "library-outline"}
+                      size={24}
+                      color={color}
+                    />
+                  ),
+                }}
+              />
 
         <Tabs.Screen
           name="profile"
