@@ -8,6 +8,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ contentStyle: { backgroundColor: "#121212" } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="playlist/[id]" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"
           options={{

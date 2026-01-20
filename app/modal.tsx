@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react"; 
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Easing, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useMusic } from "../context/MusicContext";
 
@@ -24,36 +24,58 @@ export default function ModalScreen() {
       toggleFavorite, checkIsFavorite 
   } = useMusic();
 
+  const spinValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let animation: Animated.CompositeAnimation;
+    if (isPlaying) {
+      animation = Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1, duration: 10000, easing: Easing.linear, useNativeDriver: true,
+        })
+      );
+      animation.start();
+    } else {
+      spinValue.stopAnimation();
+    }
+  }, [isPlaying]);
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1], outputRange: ['0deg', '360deg']
+  });
+
   if (!currentSong) {
     router.back();
     return null;
   }
+
   const isLiked = checkIsFavorite(currentSong.id);
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
 
-
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => {
-            if (router.canGoBack()) router.back();
-          }}
-          style={styles.closeButton}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          onPress={() => { if (router.canGoBack()) router.back(); }}
+          style={styles.circleButton} 
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="chevron-down" size={32} color="white" />
+          <Ionicons name="arrow-back" size={28} color="white" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Đang phát nhạc</Text>
 
-        <TouchableOpacity style={styles.closeButton}>
+        <TouchableOpacity style={styles.circleButton}>
           <Ionicons name="ellipsis-horizontal" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.artworkContainer}>
-        <Image source={{ uri: currentSong.image }} style={styles.artwork} />
+        <Animated.Image 
+            source={{ uri: currentSong.image }} 
+            style={[ styles.artwork, { transform: [{ rotate: spin }] } ]} 
+        />
       </View>
 
       <View style={styles.infoContainer}>
@@ -92,11 +114,7 @@ export default function ModalScreen() {
 
       <View style={styles.controls}>
         <TouchableOpacity onPress={toggleShuffle}>
-          <Ionicons
-            name="shuffle"
-            size={24}
-            color={isShuffle ? "#1DB954" : "#777"}
-          />
+          <Ionicons name="shuffle" size={24} color={isShuffle ? "#1DB954" : "#777"} />
           {isShuffle && <View style={styles.dot} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={playPrevious}>
@@ -118,16 +136,10 @@ export default function ModalScreen() {
           <Ionicons name="play-skip-forward" size={35} color="white" />
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleRepeat}>
-          <Ionicons
-            name={repeatMode === 1 ? "repeat" : "repeat"}
-            size={24}
-            color={repeatMode === 1 ? "#1DB954" : "#777"}
-          />
+          <Ionicons name={repeatMode === 1 ? "repeat" : "repeat"} size={24} color={repeatMode === 1 ? "#1DB954" : "#777"} />
           {repeatMode === 1 && (
             <View style={[styles.dot, { right: 8 }]}>
-              <Text style={{ color: "white", fontSize: 8, fontWeight: "bold" }}>
-                1
-              </Text>
+              <Text style={{ color: "white", fontSize: 8, fontWeight: "bold" }}>1</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -147,9 +159,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 30, 
   },
-  closeButton: { padding: 5 },
+  circleButton: { 
+      width: 40, 
+      height: 40, 
+      borderRadius: 20, 
+      backgroundColor: 'rgba(255,255,255,0.1)', 
+      justifyContent: 'center', 
+      alignItems: 'center',
+  },
   headerTitle: {
     color: "#ccc",
     fontSize: 12,
@@ -160,13 +179,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
-    shadowColor: "#000",
+    shadowColor: "#1DB954",
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 20,
   },
-  artwork: { width: 320, height: 320, borderRadius: 12 },
+  artwork: { 
+      width: 300, 
+      height: 300, 
+      borderRadius: 150,
+      borderWidth: 2,
+      borderColor: '#333'
+  },
   infoContainer: {
     flexDirection: "row",
     alignItems: "center",

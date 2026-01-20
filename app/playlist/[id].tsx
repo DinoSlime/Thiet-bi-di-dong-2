@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   FlatList,
@@ -13,14 +14,11 @@ import { useMusic } from "../../context/MusicContext";
 
 export default function PlaylistDetailScreen() {
   const router = useRouter();
-  // 👇 Nhận dữ liệu từ trang Library gửi sang
   const params = useLocalSearchParams();
   const { title, image, songIds } = params;
 
-  const { songs, playSong, currentSong, isPlaying } = useMusic();
+  const { songs, playSong, currentSong } = useMusic();
 
-  // 👇 Lọc ra các bài hát thuộc album này
-  // (songIds gửi sang là chuỗi "1,2,3" nên cần split ra mảng)
   const targetIds = ((songIds as string) || "").split(",");
   const playlistSongs = songs.filter((song) => targetIds.includes(song.id));
 
@@ -56,12 +54,12 @@ export default function PlaylistDetailScreen() {
 
   return (
     <View style={styles.container}>
-      {/* HEADER ẢNH BÌA TO */}
+      <StatusBar style="light" />
       <View style={styles.header}>
-        <Image source={{ uri: image as string }} style={styles.coverImage} />
-        <View style={styles.overlay} />
-
-        {/* Nút Back */}
+        <View style={styles.imageBackground}>
+          <Image source={{ uri: image as string }} style={styles.coverImage} />
+          <View style={styles.overlay} />
+        </View>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -76,12 +74,11 @@ export default function PlaylistDetailScreen() {
           </Text>
         </View>
 
-        {/* Nút Play All giả lập */}
         <TouchableOpacity
           style={styles.playButton}
           onPress={() => {
             if (playlistSongs.length > 0) {
-              playSong(playlistSongs[0]); // Phát bài đầu tiên
+              playSong(playlistSongs[0]);
               router.push("/modal");
             }
           }}
@@ -95,39 +92,52 @@ export default function PlaylistDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* DANH SÁCH BÀI HÁT */}
       <FlatList
         data={playlistSongs}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 100, paddingTop: 20 }}
+        contentContainerStyle={{ paddingBottom: 100, paddingTop: 40 }} 
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212" },
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+    paddingTop: 45,
+  },
 
   header: {
     height: 300,
     justifyContent: "flex-end",
     position: "relative",
+    marginHorizontal: 10,
+    marginBottom: 10, 
+    zIndex: 1, 
   },
-  coverImage: {
+
+  imageBackground: {
     ...StyleSheet.absoluteFillObject,
+    borderRadius: 30, 
+    overflow: "hidden", 
+    backgroundColor: "#333",
+  },
+
+  coverImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    // Gradient đen dần xuống dưới
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
+
   backButton: {
     position: "absolute",
-    top: 50,
+    top: 15,
     left: 20,
     width: 40,
     height: 40,
@@ -135,28 +145,33 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10,
   },
   headerInfo: {
     padding: 20,
     paddingBottom: 30,
   },
-  playlistTitle: { color: "white", fontSize: 36, fontWeight: "bold" },
+  playlistTitle: { color: "white", fontSize: 32, fontWeight: "bold" },
   playlistCount: { color: "#ddd", fontSize: 16, marginTop: 5 },
 
   playButton: {
     position: "absolute",
     right: 20,
-    bottom: -25, // Nằm đè lên ranh giới
+    bottom: -30, 
     width: 60,
     height: 60,
     borderRadius: 30,
     backgroundColor: "#1DB954",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 10,
+    elevation: 10, 
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 20, 
   },
 
-  // Style list item
   itemContainer: {
     flexDirection: "row",
     alignItems: "center",
