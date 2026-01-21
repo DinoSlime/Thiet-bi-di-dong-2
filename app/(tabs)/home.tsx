@@ -237,3 +237,4 @@ const styles = StyleSheet.create({
   cardTitle: { color: "white", fontSize: 16, fontWeight: "bold" },
   cardArtist: { color: "#b3b3b3", fontSize: 14 },
 });
+

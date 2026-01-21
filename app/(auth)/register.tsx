@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,22 +10,40 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { auth } from "../configs/firebaseConfig";
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Lỗi", "Mật khẩu nhập lại không khớp!");
+      return;
+    }
+
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Đăng nhập thành công!");
-      router.replace("/home"); 
+      await createUserWithEmailAndPassword(auth, email, password);
+      Alert.alert("Thành công", "Tài khoản đã được tạo!");
+      router.replace("/home");
     } catch (error: any) {
-      Alert.alert("Đăng nhập thất bại", "Sai email hoặc mật khẩu!");
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert("Lỗi", "Email này đã được đăng ký rồi!");
+      } else if (error.code === "auth/weak-password") {
+        Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự");
+      } else {
+        Alert.alert("Lỗi Đăng ký", error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -33,7 +51,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đăng nhập</Text>
+      <Text style={styles.title}>Đăng Ký</Text>
 
       <TextInput
         style={styles.input}
@@ -42,6 +60,7 @@ export default function LoginScreen() {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
 
       <TextInput
@@ -52,21 +71,28 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Nhập lại mật khẩu"
+        placeholderTextColor="#888"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry
+      />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         {loading ? (
           <ActivityIndicator color="black" />
         ) : (
-          <Text style={styles.buttonText}>Đăng Nhập</Text>
+          <Text style={styles.buttonText}>Đăng Ký Ngay</Text>
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => router.push("/register")}
-        style={{ marginTop: 20 }}
-      >
-        <Text style={{ color: "#1DB954", textAlign: "center" }}>
-          Chưa có tài khoản? Đăng ký ngay
+      <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 20 }}>
+        <Text
+          style={{ color: "#1DB954", textAlign: "center", fontWeight: "bold" }}
+        >
+          Đã có tài khoản? Đăng nhập
         </Text>
       </TouchableOpacity>
     </View>
