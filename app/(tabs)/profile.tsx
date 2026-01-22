@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,53 +11,72 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import PremiumModal from "../../components/PremiumModal";
-import { auth, db } from "../configs/firebaseConfig";
+import { auth, db } from "../configs/firebaseConfig"; 
 
 export default function ProfileScreen() {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true); 
 
+ 
   useEffect(() => {
+    let unsubscribeSnapshot: any;
+
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setLoading(true);
+
       if (user) {
+  
         const userRef = doc(db, "users", user.uid);
-        const unsubscribeSnapshot = onSnapshot(userRef, (docSnapshot) => {
+        unsubscribeSnapshot = onSnapshot(userRef, (docSnapshot) => {
           if (docSnapshot.exists()) {
             setUserData(docSnapshot.data());
           }
+          setLoading(false); 
         });
-        return () => unsubscribeSnapshot();
       } else {
+       
         setUserData(null);
+        setLoading(false);
       }
     });
 
-    return () => unsubscribeAuth();
+   
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+    };
   }, []);
 
-  // 👇 ĐÃ SỬA: Xóa dòng router.replace để không bị đá ra ngoài
+ 
   const handleLogout = () => {
-    Alert.alert("Đăng xuất", "Bạn có muốn chuyển sang chế độ Khách?", [
-      { text: "Hủy", style: "cancel" },
+    Alert.alert("Đăng xuất", "Bạn có muốn chuyển về chế độ Khách?", [
+      { text: "Ở lại đây", style: "cancel" },
       {
         text: "Đồng ý",
         style: "destructive",
         onPress: async () => {
-          await auth.signOut();
-          // ❌ Đã xóa dòng: router.replace("/"); 
-          // ✅ Để im đây, giao diện sẽ tự biến hình thành chế độ Khách
+          try {
+            await signOut(auth);
+            router.replace("/home"); 
+          } catch (error) {
+            console.log("Lỗi đăng xuất:", error);
+          }
         },
       },
     ]);
   };
 
   const handleLogin = () => {
-    router.push("/login");
+    router.push("/login"); 
   };
 
   const handleCancelRequest = async () => {
@@ -72,8 +91,9 @@ export default function ProfileScreen() {
             await updateDoc(doc(db, "users", currentUser.uid), {
               premiumStatus: null,
             });
+            Alert.alert("Thành công", "Đã hủy yêu cầu.");
           } catch (e) {
-            Alert.alert("Lỗi", "Không thể hủy");
+            Alert.alert("Lỗi", "Không thể hủy lúc này");
           }
         },
       },
@@ -83,18 +103,14 @@ export default function ProfileScreen() {
   const MenuRow = ({ icon, title, isDestructive = false, onPress }: any) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
       <View style={styles.menuLeft}>
-        <View
-          style={[styles.iconBox, isDestructive && styles.iconBoxDestructive]}
-        >
+        <View style={[styles.iconBox, isDestructive && styles.iconBoxDestructive]}>
           <Ionicons
             name={icon}
             size={22}
             color={isDestructive ? "#ff4757" : "#fff"}
           />
         </View>
-        <Text
-          style={[styles.menuText, isDestructive && styles.textDestructive]}
-        >
+        <Text style={[styles.menuText, isDestructive && styles.textDestructive]}>
           {title}
         </Text>
       </View>
@@ -102,9 +118,22 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#1DB954" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 150 }}
+      >
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <Image
@@ -117,12 +146,7 @@ export default function ProfileScreen() {
             />
             {currentUser &&
               (userData?.isPremium ? (
-                <View
-                  style={[
-                    styles.editBadge,
-                    { backgroundColor: "#FFD700", borderColor: "#FFD700" },
-                  ]}
-                >
+                <View style={[styles.editBadge, { backgroundColor: "#FFD700", borderColor: "#FFD700" }]}>
                   <Ionicons name="ribbon" size={14} color="black" />
                 </View>
               ) : (
@@ -134,7 +158,8 @@ export default function ProfileScreen() {
 
           {currentUser ? (
             <>
-              <Text style={styles.name}>Thượng Đế</Text>
+
+              <Text style={styles.name}>{userData?.fullName || "Người dùng Music"}</Text>
               <Text style={styles.email}>{currentUser.email}</Text>
             </>
           ) : (
@@ -183,35 +208,17 @@ export default function ProfileScreen() {
 
               {userData?.isPremium ? (
                 <View style={styles.premiumBadge}>
-                  <Ionicons
-                    name="ribbon"
-                    size={24}
-                    color="#000"
-                    style={{ marginRight: 10 }}
-                  />
+                  <Ionicons name="ribbon" size={24} color="#000" style={{ marginRight: 10 }} />
                   <Text style={styles.premiumText}>Thành viên Premium 👑</Text>
                 </View>
               ) : userData?.premiumStatus === "pending" ? (
                 <View style={styles.pendingBadge}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 5,
-                    }}
-                  >
-                    <Ionicons
-                      name="time"
-                      size={24}
-                      color="#000"
-                      style={{ marginRight: 10 }}
-                    />
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+                    <Ionicons name="time" size={24} color="#000" style={{ marginRight: 10 }} />
                     <Text style={styles.pendingText}>Đang chờ duyệt ⏳</Text>
                   </View>
-                  <Text
-                    style={{ fontSize: 11, color: "#333", marginBottom: 10 }}
-                  >
-                    Admin đang kiểm tra...
+                  <Text style={{ fontSize: 11, color: "#333", marginBottom: 10 }}>
+                    Admin đang kiểm tra yêu cầu...
                   </Text>
                   <TouchableOpacity
                     onPress={handleCancelRequest}
@@ -222,13 +229,7 @@ export default function ProfileScreen() {
                       borderRadius: 15,
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        fontWeight: "bold",
-                        color: "#333",
-                      }}
-                    >
+                    <Text style={{ fontSize: 12, fontWeight: "bold", color: "#333" }}>
                       Hủy yêu cầu
                     </Text>
                   </TouchableOpacity>
@@ -256,10 +257,7 @@ export default function ProfileScreen() {
 
         <View style={[styles.section, { marginBottom: 40 }]}>
           {currentUser && (
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-            >
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <Text style={styles.logoutText}>Đăng xuất</Text>
             </TouchableOpacity>
           )}

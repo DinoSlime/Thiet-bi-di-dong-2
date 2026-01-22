@@ -19,11 +19,16 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ email và mật khẩu!");
+      return;
+    }
+
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("Đăng nhập thành công!");
-      router.replace("/home"); 
+      router.replace("/home");
     } catch (error: any) {
       Alert.alert("Đăng nhập thất bại", "Sai email hoặc mật khẩu!");
     } finally {
@@ -42,6 +47,7 @@ export default function LoginScreen() {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        keyboardType="email-address"
       />
 
       <TextInput
@@ -53,7 +59,18 @@ export default function LoginScreen() {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity
+        onPress={() => router.push("/forgot-password")}
+        style={styles.forgotButton}
+      >
+        <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="black" />
         ) : (
@@ -66,7 +83,8 @@ export default function LoginScreen() {
         style={{ marginTop: 20 }}
       >
         <Text style={{ color: "#1DB954", textAlign: "center" }}>
-          Chưa có tài khoản? Đăng ký ngay
+          Chưa có tài khoản?{" "}
+          <Text style={{ fontWeight: "bold" }}>Đăng ký ngay</Text>
         </Text>
       </TouchableOpacity>
     </View>
@@ -95,6 +113,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
   },
+
+  forgotButton: {
+    alignSelf: "flex-end",
+    marginBottom: 20,
+  },
+  forgotText: {
+    color: "#1DB954",
+    fontWeight: "bold",
+  },
+  // 👆
   button: {
     backgroundColor: "#1DB954",
     padding: 15,

@@ -19,8 +19,8 @@ interface PremiumModalProps {
 }
 
 const MY_BANK = {
-  BANK_ID: "TPB",
-  ACCOUNT_NO: "03344556677",
+  BANK_ID: "MB",
+  ACCOUNT_NO: "56468877180054",
   TEMPLATE: "compact",
 };
 

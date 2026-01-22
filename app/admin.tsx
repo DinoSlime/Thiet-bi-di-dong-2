@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // 👇 1. Import router để đá user ra
+import { useRouter } from "expo-router";
 import {
   collection,
   doc,
@@ -10,38 +10,35 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator
 } from "react-native";
-import { db, auth } from "./configs/firebaseConfig"; // 👇 2. Nhớ import auth
 
-// 👇 3. KHAI BÁO EMAIL CỦA BẠN (ADMIN) VÀO ĐÂY
-const ADMIN_EMAIL = "admin@gmail.com"; // <--- Thay bằng email thật của bạn vào đây
+import { auth, db } from "./configs/firebaseConfig";
+
+const ADMIN_EMAIL = "admin@gmail.com";
 
 export default function AdminScreen() {
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
-  const [isChecking, setIsChecking] = useState(true); // Biến để chờ kiểm tra xong
+  const [isChecking, setIsChecking] = useState(true);
 
-  // 👇 4. LOGIC CHẶN CỬA (BẢO VỆ)
   useEffect(() => {
-    // Nếu chưa đăng nhập HOẶC Email không khớp với Admin
     if (!auth.currentUser || auth.currentUser.email !== ADMIN_EMAIL) {
       Alert.alert("Cảnh báo 🚫", "Bạn không có quyền truy cập khu vực này!");
-      router.replace("/(tabs)/profile"); // Đá về trang cá nhân
+      router.replace("/profile");
     } else {
-      setIsChecking(false); // Cho phép vào
+      setIsChecking(false);
     }
   }, []);
 
-  // 1. Lấy danh sách (Giữ nguyên)
   useEffect(() => {
-    if (isChecking) return; // Đang check quyền thì chưa tải dữ liệu vội
+    if (isChecking) return;
 
     const q = query(
       collection(db, "users"),
@@ -54,7 +51,6 @@ export default function AdminScreen() {
     return () => unsubscribe();
   }, [isChecking]);
 
-  // ... (Giữ nguyên các hàm handleApprove, handleReject cũ) ...
   const handleApprove = async (userId: string, userName: string) => {
     try {
       await updateDoc(doc(db, "users", userId), {
@@ -63,14 +59,20 @@ export default function AdminScreen() {
         premiumSince: new Date().toISOString(),
       });
       Alert.alert("Thành công", `Đã duyệt VIP cho ${userName}`);
-    } catch (error) { Alert.alert("Lỗi", "Không thể duyệt"); }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể duyệt");
+    }
   };
 
   const handleReject = async (userId: string) => {
     try {
-      await updateDoc(doc(db, "users", userId), { premiumStatus: null });
+      await updateDoc(doc(db, "users", userId), {
+        premiumStatus: null,
+      });
       Alert.alert("Đã từ chối", "Yêu cầu đã bị hủy.");
-    } catch (error) { Alert.alert("Lỗi", "Không thể từ chối"); }
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể từ chối");
+    }
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -80,23 +82,37 @@ export default function AdminScreen() {
         <Text style={styles.package}>Gói: {item.package || "Không rõ"}</Text>
         <Text style={styles.date}>ID: {item.id.slice(0, 5)}...</Text>
       </View>
+
       <View style={styles.actions}>
-        <TouchableOpacity style={[styles.btn, styles.btnReject]} onPress={() => handleReject(item.id)}>
+        <TouchableOpacity
+          style={[styles.btn, styles.btnReject]}
+          onPress={() => handleReject(item.id)}
+        >
           <Ionicons name="close" size={20} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.btn, styles.btnApprove]} onPress={() => handleApprove(item.id, item.email)}>
+
+        <TouchableOpacity
+          style={[styles.btn, styles.btnApprove]}
+          onPress={() => handleApprove(item.id, item.email)}
+        >
           <Ionicons name="checkmark" size={20} color="black" />
         </TouchableOpacity>
       </View>
     </View>
   );
 
-  // Nếu đang check quyền thì hiện vòng quay loading chứ chưa hiện nội dung
   if (isChecking) {
     return (
-      <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#1DB954" />
-        <Text style={{color: 'white', marginTop: 10}}>Đang kiểm tra quyền Admin...</Text>
+        <Text style={{ color: "white", marginTop: 10 }}>
+          Đang kiểm tra quyền Admin...
+        </Text>
       </View>
     );
   }
@@ -104,12 +120,16 @@ export default function AdminScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Dashboard 🛠️</Text>
-      <Text style={styles.subtitle}>Danh sách chờ duyệt ({requests.length})</Text>
+      <Text style={styles.subtitle}>
+        Danh sách chờ duyệt ({requests.length})
+      </Text>
 
       {requests.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="file-tray-outline" size={64} color="#333" />
-          <Text style={{ color: "#666", marginTop: 10 }}>Hiện chưa có yêu cầu nào.</Text>
+          <Text style={{ color: "#666", marginTop: 10 }}>
+            Hiện chưa có yêu cầu nào.
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -124,16 +144,63 @@ export default function AdminScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", padding: 20, paddingTop: 50 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 5, color: "white" },
-  subtitle: { fontSize: 16, color: "#b3b3b3", marginBottom: 20 },
-  card: { backgroundColor: "#1E1E1E", padding: 15, borderRadius: 12, marginBottom: 10, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#333" },
-  email: { fontWeight: "bold", fontSize: 16, marginBottom: 4, color: "white" },
-  package: { color: "#1DB954", fontWeight: "600", marginBottom: 2 },
-  date: { color: "#b3b3b3", fontSize: 12 },
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+    padding: 20,
+    paddingTop: 50,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "white",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#b3b3b3",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: "#1E1E1E",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  email: {
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 4,
+    color: "white",
+  },
+  package: {
+    color: "#1DB954",
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  date: {
+    color: "#b3b3b3",
+    fontSize: 12,
+  },
   actions: { flexDirection: "row", gap: 10 },
-  btn: { width: 40, height: 40, borderRadius: 20, justifyContent: "center", alignItems: "center" },
-  btnReject: { backgroundColor: "#333", borderWidth: 1, borderColor: "#ff4757" },
-  btnApprove: { backgroundColor: "#1DB954" },
+  btn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnReject: {
+    backgroundColor: "#333",
+    borderWidth: 1,
+    borderColor: "#ff4757",
+  },
+  btnApprove: {
+    backgroundColor: "#1DB954",
+  },
   empty: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
